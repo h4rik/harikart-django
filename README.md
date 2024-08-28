@@ -1,0 +1,1 @@
+# harikart-django
