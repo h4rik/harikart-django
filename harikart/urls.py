@@ -27,4 +27,5 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('store/', include('store.urls')), 
     # when user clicks on stores, it should redirect to stores - urls.py
+    path('carts/', include('carts.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
