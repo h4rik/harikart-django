@@ -5,6 +5,7 @@ from .models import Product
 from category.models import Category
 from carts.views import _cart_id
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
 
 # Create your views here.
 
@@ -55,3 +56,25 @@ def product_detail(request, category_slug, product_slug):
         'in_cart': in_cart,
     }
     return render(request, 'store/product_detail.html', context)
+
+
+def search(request):
+    if 'keyword' in request.GET:
+        keyword = request.GET['keyword']
+    # keyword is the attribute passed in input field of search and and we want to value of keyword when someone searches 
+    # ex :http://127.0.0.1:8000/store/search/?keyword=shirts here the key is keyword and shirts is value which we want
+        if keyword:  # to check if keyword is not blank
+            products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
+
+            # underscore underscore contains means this will look for the whole description and product name of products (both) and 
+            # if it found anything related to this keyword,ex: jeans, then it is it will bring that product and show it inside the search result page.
+            # and i djnago we cant use | (OR) operator alone with filter ex :description__icontains=keyword | product_name__icontains=keyword the example does not work.
+            # and , between those two acts as AND .
+            # So we need to use some things called Q, through which we can use OR operator inside filter. 
+            Product_count = products.count()
+
+    context = {
+        'products': products,
+        'Product_count': Product_count,
+    }
+    return render(request, 'store/store.html', context)
