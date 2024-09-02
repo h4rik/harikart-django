@@ -1,0 +1,24 @@
+{% autoescape off %}
+
+Hi {{ user.first_name }},
+
+Please click on the below link to confirm your Registration
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+if you think it's not you. Please ignore the email.
+
+
+{% endautoescape %}
+
+{% comment %}
+<!--So actually we need we use this auto escape off. It is because we are going to render the HTML inside this one.
+which is the safest way of rendering the HTML when we are sending the emails.
+autoescape would be a protection against cross site scripting, not sql injection-->
+
+<!--
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+activate is the view and we need to configure SMTP, which will be used to send emails and
+in settings.py we need to configure all the email hosts and all the other req things.
+If the user clicks on verification button or clicks on link the token automatically gets expired, that is the token is only for one use-->
+{% endcomment %}

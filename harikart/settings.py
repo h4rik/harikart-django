@@ -141,3 +141,29 @@ MEDIA_ROOT = BASE_DIR /'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# if we use django messages we need to use the below , otherthan this, django messages is installed in INSTALLED_APPS 
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}
+
+
+#SMTP Configuration, by doing this configuration we can send mails to users to activate the links.
+# It's now working(that is to send email to user), by turning on the two-step authentication process and then creating an app password.
+# Now the app password is the host_password below and by giving that we can send mails to users for the activation.
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587     # 587  is for gmail and for other hosts it may differ
+EMAIL_HOST_USER = 'sadhuhari88@gmail.com'
+EMAIL_HOST_PASSWORD = 'qwthaaklxidvgcmb'
+EMAIL_USE_TLS = True
+
+
+"""
+SMTP Configuration in Django: SMTP (Simple Mail Transfer Protocol) is used for sending emails from a Django application.
+When configuring SMTP in Django, you typically provide credentials for an email server (e.g., Gmail SMTP server) to allow your Django application to send emails.
+Each user of your Django site does not need to have their email included in the SMTP configuration. 
+Instead, the SMTP configuration typically includes the email address associated with the Django site itself, which is used to send emails on behalf of the site (e.g., for password reset emails).
+"""
