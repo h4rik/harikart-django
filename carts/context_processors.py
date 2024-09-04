@@ -11,8 +11,11 @@ def counter(request):
     else:
         try:
             cart = Cart.objects.filter(cart_id=_cart_id(request))
-            cart_items = CartItem.objects.all().filter(cart=cart[:1])
-            # we only need one result so [:1]
+            if request.user.is_authenticated:  # if request user is authenticated,then that means the user is any user is logged in. Then give me the count of the cart items for that particular user.Not based on the cart ID.
+                cart_items = CartItem.objects.all().filter(user = request.user)
+            else: # if the user is not logged in
+                cart_items = CartItem.objects.all().filter(cart=cart[:1])
+            # we only need one result so [:1], even if you have many cart ID's it will give you only one cart ID.
             for cart_item in cart_items:
                 cart_count += cart_item.quantity
         except Cart.DoesNotExist:
