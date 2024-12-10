@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-bf!p3$x0st@)ptk#$%pobju=)rc(!!okl(&nr#dg!+u3893(x&'
-
+SECRET_KEY = config('SECRET_KEY')
+#config will bring values from .env file where we delcared value of SECRET_KEY
+# config will return value in the form of string, for debug we want boolean value so we use cast variable which default in python-decouple
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -41,6 +44,8 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
+    'orders',
+    'admin_honeypot', 
 ]
 
 MIDDLEWARE = [
@@ -51,7 +56,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_session_timeout.middleware.SessionTimeoutMiddleware',
 ]
+
+SESSION_EXPIRE_SECONDS = 60  # 1 hour
+
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+SESSION_TIMEOUT_REDIRECT = 'accounts/login'
 
 ROOT_URLCONF = 'harikart.urls'
 
@@ -154,11 +166,12 @@ MESSAGE_TAGS = {
 # It's now working(that is to send email to user), by turning on the two-step authentication process and then creating an app password.
 # Now the app password is the host_password below and by giving that we can send mails to users for the activation.
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587     # 587  is for gmail and for other hosts it may differ
-EMAIL_HOST_USER = 'sadhuhari88@gmail.com'
-EMAIL_HOST_PASSWORD = 'qwthaaklxidvgcmb'
-EMAIL_USE_TLS = True
+#by default config will return or print string, so we use cast to get values which we like
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)     # 587  is for gmail and for other hosts it may differ
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 
 
 """
@@ -167,3 +180,13 @@ When configuring SMTP in Django, you typically provide credentials for an email 
 Each user of your Django site does not need to have their email included in the SMTP configuration. 
 Instead, the SMTP configuration typically includes the email address associated with the Django site itself, which is used to send emails on behalf of the site (e.g., for password reset emails).
 """
+
+
+# the below are for making payments work
+
+SECURE_BROWSER_XSS_FILTER = True
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups' 
+
+#we also put the .env file inside the .gitignore file(by default it is already inside the .gitignore file) we dont want it push into the github as .env will have sensitive information
+# django-timeout-session is used to logout of the website automatically logout of the application within some period of time

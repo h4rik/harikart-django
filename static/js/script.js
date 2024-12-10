@@ -58,3 +58,15 @@ $(document).ready(function() {
 }); 
 // jquery end
 
+
+setTimeout(function(){
+    $('message').fadeOut('slow')
+}, 1000)
+
+/*
+
+the above is to fadeout the message that is(Registration Successful.) raised after successful registration
+The    message is from <div id="message" class="container"> it is in alerts.html
+
+*/
+// to make the above effective do hard refersh and clear cache can be done using Hold down Ctrl, Shift and the 'R' key. Or Hold down Ctrl and press F5
