@@ -168,7 +168,7 @@ def order_complete(request):
         for i in ordered_products:
             sub_total += i.product_price * i.quantity
 
-        # we can get the payment id from the get request but it is not the right way
+        # we can get the payment id from the get request but it is `not the right way
         payment = Payment.objects.get(payment_id=transID)
 
         context = {

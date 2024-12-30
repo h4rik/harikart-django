@@ -198,14 +198,15 @@ So that time what will happen is all the cart item will be reflected inside the 
                          //   console.log('Transaction Completed.')
                         //])
                         .then((data) => {
-                            window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.payment_id;
+                            window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
                         });
+                        // the 'data' used in the above is declared in views.py of orders and that is being used there and order_number and transID are also declared in data
                         // the main reason behind sending the order_number and payment_id because in the order_complete view (in views.py the order_complete function) we are 
                         // going to fetch the order_number and payment_id from the get request, we want to show the user about details of order and to print in invoice
                     }
                     // Successful capture! For demo purposes:
                     //console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                    
+                        
                 });
             }
 
