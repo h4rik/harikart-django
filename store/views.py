@@ -1,11 +1,14 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404, redirect
 from django.http import HttpResponse
 from carts.models import CartItem
-from .models import Product
+from orders.models import OrderProduct
+from .models import Product, ReviewRating
 from category.models import Category
 from carts.views import _cart_id
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
+from .forms import ReviewForm
+from django.contrib import messages
 
 # Create your views here.
 
@@ -51,9 +54,24 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
     
+    if request.user.is_authenticated:  #when we dont use this if statement we get error(because of "user=request.user" in the below orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()), when try to see products without logging in.
+        try:
+            #we use OrderProduct because it is where the user and product info is available
+            orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
+        except OrderProduct.DoesNotExist:
+            orderproduct = None
+    else:
+        orderproduct = None
+
+    #Get the reviews
+    # if admin wants to hide some comments, then can set status to False
+    reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
+
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
+        'orderproduct': orderproduct, 
+        'reviews': reviews,
     }
     return render(request, 'store/product_detail.html', context)
 
@@ -78,3 +96,35 @@ def search(request):
         'Product_count': Product_count,
     }
     return render(request, 'store/store.html', context)
+
+
+def submit_review(request, product_id):
+    url = request.META.get('HTTP_REFERER')  # HTTP_REFERER is used to get the url of the previous page.and store it in url variable
+    if request.method == 'POST':
+        try:
+            reviews = ReviewRating.objects.get(user__id=request.user.id, product__id=product_id)
+            form = ReviewForm(request.POST, instance=reviews)
+            #inside the request, we are going to have all the stars, review, etc and also we use instance because if there is already an existing review 
+            # it will update with the new one for the same user and product, otherwise will create a new review for the new userid and product
+            form.save()
+            messages.success(request, 'Thank you!, Your review has been updated.')
+            return redirect(url)
+        except ReviewRating.DoesNotExist:
+        # if a review and rating does not exist it will create a new record
+            form = ReviewForm(request.POST)  
+            if form.is_valid():
+                data = ReviewRating() # here ReviewRating is a object
+                data.subject = form.cleaned_data['subject']  # so here we are taking all the values from the form what user has entered and creating a new record
+                data.rating = form.cleaned_data['rating']
+                data.review = form.cleaned_data['review']
+                data.ip = request.META.get('REMOTE_ADDR')
+                data.product_id = product_id
+                data.user_id = request.user.id
+                data.save()
+                messages.success(request, 'Thank you!, Your review has been submitted.')
+                return redirect(url)
+
+
+
+
+# In product__id, we use double underscore because inside the ReviewRating class(in models.py) we access the product and its id from Product table which is a foreign key     product = models.ForeignKey(Product, on_delete=models.CASCADE)

@@ -79,6 +79,9 @@ class Account(AbstractBaseUser):
     # we need to tell this account that we are using the my account manager for creating normal and superuser 
     objects = MyAccountManager()
 
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
     #This just means that when we return the account object inside the template. So this should return the email address.
     def __str__(self):
         return self.email

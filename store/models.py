@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
-from category.models import Category
+from category.models import Category    
+from accounts.models import Account
+from django.db.models import Avg, Count
 
 # Create your models here.
 class Product(models.Model):
@@ -25,6 +27,22 @@ class Product(models.Model):
     # string representation of our model
     def __str__(self):
         return self.product_name
+    
+    def averageReview(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))  #product=self, here self means using product which is brought means using the above class Product
+        avg = 0
+        if reviews['average'] is not None:   #average means which is declared here "aggregate(average=Avg('rating')"
+            avg = float(reviews['average'])
+        return avg
+
+    def countReviews(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('rating'))
+        count = 0
+        if reviews['count'] is not None:
+            count = int(reviews['count'])  #count used here is which we declared here "aggregate(count=Count('rating'))"
+        return count
+
+
 
 # variation manager is used to modify the query set 
 # earlier when we add new size variation in the database, it would appear in choose color dropdown in product_detail.html
@@ -65,3 +83,22 @@ class Variation(models.Model):
     # we should not use str because we dont want string , we want the variation be added in the database
     def __str__(self):
         return self.variation_value
+    
+
+
+class ReviewRating(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # the above tells if the product is delete then reviews will also be deleted
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=100, blank=True)
+    review = models.TextField(max_length=500, blank=True)
+    rating = models.FloatField()  #because it will be 1, 1.5, 2, 2.5
+    ip = models.CharField(max_length=20, blank=True)
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    #string representation of the model
+    def __str__(self):
+        return self.subject
+    

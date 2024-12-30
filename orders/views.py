@@ -8,6 +8,8 @@ import json
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+
 # Create your views here.
 
 
@@ -45,7 +47,7 @@ def payments(request):
         orderproduct.user_id = request.user.id
         orderproduct.product_id = item.product_id
         orderproduct.quantity = item.quantity
-        orderproduct.product_price = item.product.price
+        orderproduct.product_price = item.product.  price
         orderproduct.ordered = True
         orderproduct.save()
         #we declare variation after saving the product details because it is a many to many field (can see that in views.py of carts or orders) so we should declare after saving the details otherwise we get an error
@@ -79,13 +81,13 @@ def payments(request):
         'order_number': order.order_number,
         'transID': payment.payment_id,
     }
-    return JsonResposne(data)
+    return JsonResponse(data)
     # the above data will go to function in payments.html, function(data, actions) and .then(response => response.json()) .then(data => console.log(data));
 
 
 
 
-
+@login_required
 def place_order(request, total=0, quantity=0):
     current_user = request.user
 
@@ -174,6 +176,7 @@ def order_complete(request):
             'ordered_products': ordered_products,
             'order_number': order.order_number,
             'transID': payment.payment_id,
+            'payment': payment, 
             'subtotal': sub_total,
         }
         return render(request, 'orders/order_complete.html', context)
